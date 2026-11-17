@@ -43,21 +43,22 @@ El recorrido son seis clips de video encadenados (cafetal, cosecha, secado, tost
 | Framework | [Astro](https://astro.build) |
 | Estilos | Tailwind CSS 4 |
 | Íconos | `astro-icon` + Phosphor |
-| Analítica | [Umami](https://umami.is) (sin cookies) |
+| Analítica | [GoatCounter](https://www.goatcounter.com) (sin cookies) |
 | Hosting | GitHub Pages, desplegado con GitHub Actions |
 
 ## Analítica
 
-Además de las visitas, Umami recibe estos eventos (en `src/scripts/analytics.ts`):
+Además de las visitas, GoatCounter recibe estos eventos (en `src/scripts/analytics.ts`, salvo el del footer):
 
 | Evento | Cuándo se envía |
 | :-- | :-- |
 | `seccion-1-cafetal` … `seccion-6-tu-bolsa` | La primera vez que el visitante llega a cada escena |
 | `scroll-25` / `50` / `75` / `100` | Al pasar por cada porcentaje de la página |
 | `cta-comprar` | Clic en cualquier enlace a `#comprar` |
-| `pedido-enviado` | Envío del formulario de prueba, con la molienda elegida |
+| `pedido-enviado-<molienda>` | Envío del formulario de prueba (p. ej. `pedido-enviado-grano-entero`) |
+| `click-portfolio` | Clic en el enlace al portfolio del footer (`data-goatcounter-click`) |
 
-Con los eventos de sección se arma un embudo en Umami para ver en qué escena se va la gente.
+Con los eventos de sección se ve en GoatCounter en qué escena se va la gente.
 
 ## Desarrollo
 
@@ -84,7 +85,7 @@ public/
   products/         # foto del producto
 src/
   pages/            # index, privacidad, términos, 404
-  layouts/          # Layout base (meta tags, Umami)
+  layouts/          # Layout base (meta tags, GoatCounter)
   components/       # Nav, Footer, SimplePage
   scripts/          # scroll-world.js (motor del recorrido), analytics.ts
   lib/url.ts        # withBase() para el base path

@@ -417,7 +417,7 @@ const ctaClass =
         onSection: (i: number, s: any) => {
           if (seenSections.has(i)) return;
           seenSections.add(i);
-          track(`seccion-${i + 1}-${s.id}`, { numero: i + 1, id: s.id });
+          track(`seccion-${i + 1}-${s.id}`);
         },
         sections: scenes.map((s: any, i: number) => ({
           ...s,
@@ -462,7 +462,7 @@ const ctaClass =
         if (label) label.textContent = 'Pedir mi bolsa';
         success.textContent = `Pedido de prueba registrado: una bolsa en ${grind?.toLowerCase()}. Te escribiremos a ${value} con el pago y la fecha de tueste.`;
         success.classList.remove('hidden');
-        track('pedido-enviado', { molienda: grind ?? 'sin molienda' });
+        track(`pedido-enviado-${(grind ?? 'sin molienda').toLowerCase().replace(/\s+/g, '-')}`);
       }, 900);
     });
   </script>

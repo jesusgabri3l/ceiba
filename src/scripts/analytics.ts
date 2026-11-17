@@ -1,13 +1,13 @@
-// Umami custom events. Pageviews are counted by the script tag in
+// GoatCounter custom events. Pageviews are counted by the script tag in
 // Layout.astro; this only sends named events. If the script is blocked
-// (ad blockers) or the domain isn't ceiba.cafe, events are silently dropped.
+// (ad blockers) or running on localhost, events are silently dropped.
+// GoatCounter events carry no extra data, so any detail goes in the name.
 
-type EventData = Record<string, string | number>;
-type Umami = { track?: (name: string, data?: EventData) => void };
+type GoatCounter = { count?: (vars: { path: string; title?: string; event: boolean }) => void };
 
-export function track(name: string, data?: EventData) {
-  const send = () => ((window as any).umami as Umami | undefined)?.track?.(name, data);
-  if ((window as any).umami?.track || document.readyState === 'complete') send();
+export function track(name: string) {
+  const send = () => ((window as any).goatcounter as GoatCounter | undefined)?.count?.({ path: name, title: name, event: true });
+  if ((window as any).goatcounter?.count || document.readyState === 'complete') send();
   else window.addEventListener('load', send, { once: true });
 }
 

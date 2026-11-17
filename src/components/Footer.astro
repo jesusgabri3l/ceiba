@@ -4,7 +4,7 @@ import { Icon } from 'astro-icon/components';
 import { withBase } from '../lib/url';
 
 const credits = [
-  { label: 'Portfolio', href: 'https://jesusgabriel.dev/', icon: 'ph:globe-simple' },
+  { label: 'Portfolio', href: 'https://jesusgabriel.dev/', icon: 'ph:globe-simple', event: 'click-portfolio' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/jesus-ahumada', icon: 'ph:linkedin-logo' },
 ];
 ---
@@ -38,6 +38,7 @@ const credits = [
                 href={c.href}
                 target="_blank"
                 rel="noopener"
+                data-goatcounter-click={c.event}
               >
                 <Icon name={c.icon} class="h-4 w-4" aria-hidden="true" />
                 {c.label}

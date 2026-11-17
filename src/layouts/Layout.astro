@@ -36,13 +36,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <meta name="generator" content={Astro.generator} />
-    <!-- Umami analytics: no cookies; data-domains skips localhost visits. -->
+    <!-- GoatCounter analytics: no cookies; localhost visits are ignored by count.js. -->
     <script
       is:inline
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="ad8ce00f-c9d2-4eea-9bef-f38b47d68f7b"
-      data-domains="jesusgabri3l.github.io"></script>
+      data-goatcounter="https://ceiba.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"></script>
   </head>
   <body>
     <a
