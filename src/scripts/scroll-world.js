@@ -102,7 +102,7 @@ function mountScrollWorld(container, config) {
   // ---- build the interleaved segment chain: dive0, conn0, dive1, … diveN-1 ----
   const SEGMENTS = [];
   SECTIONS.forEach((s, i) => {
-    const dive = { kind: 'dive', si: i, clip: s.clip, clipM: s.clipMobile, clipA: s.clipAv1, clipH: s.clipHd, clipHA: s.clipHdAv1, still: s.still, stillM: s.stillMobile,
+    const dive = { kind: 'dive', si: i, clip: s.clip, clipM: s.clipMobile, clipA: s.clipAv1,still: s.still, stillM: s.stillMobile,
                    accent: s.accent, w: s.scroll || DIVE_W, linger: s.linger || 0 };
     SEGMENTS.push(dive);
     s._seg = dive;
@@ -224,25 +224,33 @@ function mountScrollWorld(container, config) {
     // and simply cross-dissolve as you scroll. No scrubbed video motion, no decode cost.
     if (reduce || videoBlocked || s.loading || !s.clip) return;
     s.loading = true;
-    // Already fetched once and released by unloadClip: rebuild from the cached blob.
-    if (s.blobUrl) { attachVideo(s, s.blobUrl); return; }
+    fetchClip(s).then(url => {
+      // Scrolled away while fetching: keep the blob, skip the decoder.
+      if (s.loading) attachVideo(s, url);
+    }).catch(() => { s.loading = false; });
+  }
+
+  // Download a clip once into a Blob URL; shared by loadClip and the background prefetch.
+  function fetchClip(s) {
+    if (s.blobUrl) return Promise.resolve(s.blobUrl);
+    if (s.fetching) return s.fetching;
     // Serve the lighter mobile encode on phones when one was provided; on desktop
     // prefer the AV1 encode only where the browser decodes it smoothly in hardware.
-    av1Smooth.then(av1 => {
-      // Large screens (ultrawide, 4K, retina) get the 2560px encode where a scene has one,
-      // since the 1880px master is visibly stretched once it covers ~3000 device pixels.
-      const large = !isMobile() && innerWidth * (window.devicePixelRatio || 1) > 2200;
-      const url = (isMobile() && s.clipM) ? s.clipM
-        : (large && s.clipH) ? ((av1 && s.clipHA) ? s.clipHA : s.clipH)
-        : (av1 && s.clipA) ? s.clipA : s.clip;
+    s.fetching = av1Smooth.then(av1 => {
+      const url = (isMobile() && s.clipM) ? s.clipM : (av1 && s.clipA) ? s.clipA : s.clip;
       return fetch(url);
     }).then(r => r.ok ? r.blob() : Promise.reject(new Error('404')))
-      .then(blob => {
-        s.blobUrl = URL.createObjectURL(blob);
-        // Scrolled away while fetching: keep the blob, skip the decoder.
-        if (!s.loading) return;
-        attachVideo(s, s.blobUrl);
-      }).catch(() => { s.loading = false; });
+      .then(blob => (s.blobUrl = URL.createObjectURL(blob)))
+      .finally(() => { s.fetching = null; });
+    return s.fetching;
+  }
+
+  // On deployed sites a clip that starts downloading only when you near it arrives late
+  // and the scrub stutters. On desktop, download every clip in scroll order once the
+  // page has loaded so each is a cached blob before you reach it. Phones skip this (data).
+  function prefetchAll() {
+    if (reduce || isMobile()) return;
+    SEGMENTS.filter(s => s.clip).reduce((p, s) => p.then(() => videoBlocked ? null : fetchClip(s).catch(() => {})), Promise.resolve());
   }
 
   function attachVideo(s, url) {
@@ -436,6 +444,8 @@ function mountScrollWorld(container, config) {
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', layout);
   window.addEventListener('load', layout);
+  if (document.readyState === 'complete') prefetchAll();
+  else window.addEventListener('load', prefetchAll, { once: true });
   layout();
   requestAnimationFrame(raf);
 
