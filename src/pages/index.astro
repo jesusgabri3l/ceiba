@@ -4,6 +4,8 @@ import { withBase } from '../lib/url';
 import Layout from '../layouts/Layout.astro';
 
 // Scenes of the scroll-scrubbed camera flight (one continuous take, chained clips).
+// Scenes with a 4K-upscaled master, served at 2560px to large screens.
+const HD_SCENES = [1, 2, 3, 6];
 const scenes = [
   {
     id: 'cafetal',
@@ -64,6 +66,11 @@ const scenes = [
   clipMobile: withBase(`/world/scene-${i + 1}-m.mp4`),
   // Half the size of the H.264 master; served only where AV1 decodes in hardware.
   clipAv1: withBase(`/world/scene-${i + 1}.av1.mp4`),
+  // 2560px encodes for large screens, only on the wide shots that need them.
+  ...(HD_SCENES.includes(i + 1) && {
+    clipHd: withBase(`/world/scene-${i + 1}-hd.mp4`),
+    clipHdAv1: withBase(`/world/scene-${i + 1}-hd.av1.mp4`),
+  }),
   still: withBase(`/world/scene-${i + 1}.webp`),
 }));
 
